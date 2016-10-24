@@ -1,5 +1,5 @@
 # simple-chatroom
-a simple chatroom based on vue and socket.io(the homework for modern communication technology).
+a simple chatroom based on vue.js and socket.io(the homework for modern communication technology).
 
 ## 截图
 ### 进入聊天室
