@@ -3,15 +3,21 @@
         <h4 class="head">你好: "{{ username }}"</h4>
         <div id="items">
             <div v-for="message in messages">
-                <div v-if="$index % 2 == 0" style="float: left">
-                    <img class="avatar" :src="avatars[message.avatar]">
-                    <p class="name">{{ message.username }}</p>
+                <div v-if="!message.isMyself" class="left">
+                    <div style="float: left">
+                        <img class="avatar" :src="avatars[message.avatar]">
+                        <p class="name">{{ message.username }}</p>
+                    </div>
+                    <p class="mess">{{ message.content }}</p>
                 </div>
-                <div v-else style="float: right">
-                    <img class="avatar" :src="avatars[message.avatar]">
-                    <p class="name">{{ message.username }}</p>
+                <div v-else class="right">
+                    <div style="float: right">
+                        <img class="avatar" :src="avatars[message.avatar]">
+                        <p class="name">{{ message.username }}</p>
+                    </div>
+                    <p class="mess">{{ message.content }}</p>
                 </div>
-                <p class="mess">{{ message.content }}</p>
+
             </div>
 
         </div>
@@ -28,7 +34,7 @@
 <script type="text/ecmascript-6">
     import { state } from '../store/state'
     import { avatars } from '../const/avatars'
-//    let socket = io();
+    let socket = io();
     export default {
         data() {
             return {
@@ -44,17 +50,17 @@
                 this.$route.router.go('/login')
             }
 
-//            let that = this;
-//            socket.on('chat message', function(msg){
-//                let msg = JSON.parse(msg);
-//                //判断消息是不是自己发送的
-//                msg.isMyself = that.avatar == msg.avatar && that.username == msg.username;
-//                that.messages.push(msg);
-//                //滑动到底部
-//                setTimeout(() => {
-//                    $("#items").scrollTop($("#items")[0].scrollHeight)
-//                }, 10);
-//            });
+            let that = this;
+            socket.on('chat message', function(msg){
+                let message = JSON.parse(msg);
+                //判断消息是不是自己发送的
+                message.isMyself = that.avatar == message.avatar && that.username == message.username;
+                that.messages.push(message);
+                //滑动到底部
+                setTimeout(() => {
+                    $("#items").scrollTop($("#items")[0].scrollHeight)
+                }, 10);
+            });
         },
         methods: {
             sendMsg() {
@@ -64,12 +70,7 @@
                     username: this.username
                 };
 
-//                socket.emit('chat message', JSON.stringify(message));
-
-                this.messages.push(message);
-                setTimeout(function () {
-                    $("#items").scrollTop($("#items")[0].scrollHeight)
-                }, 10);
+                socket.emit('chat message', JSON.stringify(message));
             }
 
         }
@@ -108,15 +109,15 @@
         width: 100%;
         clear: both;
     }
-    #items>div:nth-child(odd){
+    #items .left{
         text-align: left;
     }
-    #items>div:nth-child(odd) img{
+    #items .left img{
         float: left;
         margin-left: 10px;
         vertical-align: middle;
     }
-    #items>div:nth-child(odd) .mess{
+    #items .left .mess{
         float: left;
         padding: 10px 4px;
         margin-left: 20px;
@@ -125,23 +126,22 @@
         max-width: 240px;
         word-break: break-all;
     }
-    #items>div:nth-child(odd) .name {
-        margin-left: 10px;
-        width: 45px;
+    #items .left .name{
         text-align: center;
-        color: #8ab493;
+        width: 45px;
+        margin-left: 10px;
     }
 
 
-    #items>div:nth-child(even){
+    #items .right{
         text-align: right;
     }
-    #items>div:nth-child(even) img{
+    #items .right img{
         float: right;
         margin-right: 10px;
         vertical-align: middle;
     }
-    #items>div:nth-child(even) .mess{
+    #items .right .mess{
         float: right;
         padding: 10px 4px;
         margin-right: 20px;
@@ -151,10 +151,9 @@
         word-break: break-all;
         text-align: left;
     }
-    #items>div:nth-child(even) .name{
+    #items .right .name{
         width: 45px;
         text-align: center;
-        color: #8ab493;
     }
 
     .avatar{
